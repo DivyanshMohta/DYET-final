@@ -25,26 +25,29 @@ const extractTextFromPDF = async (pdfBuffer: Buffer): Promise<string> => {
 const generateQuiz = async (text: string): Promise<any> => {
   try {
     const response = await axios.post(API_URL, {
-      contents: [{ parts: [{ text }] }] // ✅ Use the actual text input
+      contents: [{ parts: [{ text }] }], // ✅ Use the actual text input
     });
 
     if (response.status === 200) {
       const result = response.data;
       console.log("Gemini API Response:", result);
 
-      const quizText = result?.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini";
-      
+      const quizText =
+        result?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "No response from Gemini";
+
       return quizText;
     } else {
-      return { error: "Failed to generate quiz", details: `Status Code: ${response.status}` };
+      return {
+        error: "Failed to generate quiz",
+        details: `Status Code: ${response.status}`,
+      };
     }
   } catch (error: any) {
     console.error("Error generating quiz:", error.message);
     return { error: "Failed to generate quiz", details: error.message };
   }
 };
-
-
 
 // ✅ Handle POST requests
 export async function POST(req: NextRequest) {
@@ -53,7 +56,10 @@ export async function POST(req: NextRequest) {
     const { url } = body;
 
     if (!url || typeof url !== "string") {
-      return NextResponse.json({ error: "A valid PDF URL is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "A valid PDF URL is required" },
+        { status: 400 }
+      );
     }
 
     // ✅ Fetch the PDF as a binary buffer
@@ -63,7 +69,8 @@ export async function POST(req: NextRequest) {
     const pdfText = await extractTextFromPDF(response.data);
 
     // ✅ Generate quiz from the extracted text
-    const quizData = await generateQuiz(`Generate a multiple-choice quiz from this content:\n\n${pdfText} return in json fomrate like this {
+    const quizData =
+      await generateQuiz(`Generate a multiple-choice quiz from this content:\n\n${pdfText} return in json fomrate like this {
   "quiz": [
     {
       "question": "What is the capital of France?",
@@ -83,7 +90,7 @@ export async function POST(req: NextRequest) {
   ]
 }
 no other things`);
-console.log(quizData)
+    console.log(quizData);
 
     return NextResponse.json({
       message: "Quiz generated successfully",
@@ -91,7 +98,10 @@ console.log(quizData)
     });
   } catch (error: any) {
     console.error("Error processing PDF:", error.message);
-    return NextResponse.json({ error: "Failed to process the PDF", details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to process the PDF", details: error.message },
+      { status: 500 }
+    );
   }
 }
 

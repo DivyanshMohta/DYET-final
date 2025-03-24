@@ -1,31 +1,102 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 
 interface QuizQuestion {
-  id: number;
   question: string;
   options: string[];
-  correctAnswer: number;
+  correctAnswer: string;
 }
 
 interface QuizProps {
   unitTitle: string;
-  questions: QuizQuestion[];
+  apiUrl: string;
   onComplete: (passed: boolean, score: number) => void;
   passingScore: number;
 }
 
-const Quiz: React.FC<QuizProps> = ({ unitTitle, questions, onComplete, passingScore = 70 }) => {
+type Quiz = {
+  question: string;
+  options: string[];
+  answer: string;
+  _id: string;
+};
+
+type Subject = {
+  name: string;
+  quiz?: Quiz[];
+};
+
+type Course = {
+  year: string;
+  branch: string;
+  subjects: Subject[];
+};
+
+type CourseData = {
+  courses: Course[];
+};
+
+function getQuizBySubject(data: CourseData, subjectName: string): Quiz[] | undefined {
+  for (const course of data.courses) {
+      for (const subject of course.subjects) {
+          if (subject.name === subjectName) {
+              return subject.quiz; // Return quiz if found
+          }
+      }
+  }
+  return []; // Return undefined if subject not found
+}
+
+const Quiz: React.FC<QuizProps> = ({ unitTitle, apiUrl, onComplete, passingScore = 70 }) => {
+  const [questions, setQuestions] = useState<Quiz[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>(Array(questions.length).fill(-1));
+  const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAnswerSelect = (optionIndex: number) => {
+  useEffect(() => {
+  const fetchQuestions = async () => {
+    try {
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        
+      });
+      
+      if (!response.ok) throw new Error("Failed to fetch questions");
+      
+      const data: CourseData = await response.json();
+      // console.log(data);
+      
+      var quizQuestions: Quiz[] | undefined = getQuizBySubject(data, "OS");
+
+      if (quizQuestions) {
+        setQuestions(quizQuestions.slice(0, 5));
+        console.log(quizQuestions.length);
+        setSelectedAnswers(Array(quizQuestions.length).fill(-1));
+      } else {
+        setError("No quiz found for the subject.");
+        setLoading(false);
+      }
+      setLoading(false);
+    } catch (err) {
+      setError((err as Error).message);
+      setLoading(false);
+    }
+  };
+
+  fetchQuestions();
+}, [apiUrl]);
+
+  const handleAnswerSelect = (option: string) => {
     const newSelectedAnswers = [...selectedAnswers];
-    newSelectedAnswers[currentQuestion] = optionIndex;
+    newSelectedAnswers[currentQuestion] = option;
     setSelectedAnswers(newSelectedAnswers);
   };
 
@@ -42,16 +113,37 @@ const Quiz: React.FC<QuizProps> = ({ unitTitle, questions, onComplete, passingSc
   };
 
   const calculateScore = () => {
+    if (questions.length === 0) return 0;
+    
     let correctCount = 0;
-    selectedAnswers.forEach((selectedAnswer, index) => {
-      if (selectedAnswer === questions[index].correctAnswer) {
+    questions.forEach((question, index) => {
+      if (index < selectedAnswers.length && question.answer && selectedAnswers[index] === question.answer) {
         correctCount++;
       }
     });
+    console.log(correctCount);
     return (correctCount / questions.length) * 100;
   };
 
-  const handleSubmit = () => {
+  // const handleSubmit = async () => {
+  //   setIsSubmitting(true);
+  //   const score = calculateScore();
+  //   const passed = score >= passingScore;
+
+  //   try {
+  //     await fetch(`${apiUrl}/submit`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ score, passed, answers: selectedAnswers })
+  //     });
+  //     setShowResults(true);
+  //     onComplete(passed, score);
+  //   } catch (err) {
+  //     setError("Failed to submit quiz results");
+  //   }
+  //   setIsSubmitting(false);
+  // };
+    const handleSubmit = () => {
     setIsSubmitting(true);
     // Simulate API call with timeout
     setTimeout(() => {
@@ -63,180 +155,77 @@ const Quiz: React.FC<QuizProps> = ({ unitTitle, questions, onComplete, passingSc
     }, 1000);
   };
 
-  const isQuizComplete = selectedAnswers.every(answer => answer !== -1);
 
-  if (showResults) {
-    const score = calculateScore();
-    const passed = score >= passingScore;
-    
-    return (
-      <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Quiz Results: {unitTitle}</h2>
-        
-        <div className="text-center mb-8">
-          <div className={`text-5xl mb-4 ${passed ? 'text-green-500' : 'text-red-500'}`}>
-            {passed ? <CheckCircle className="inline" size={64} /> : <XCircle className="inline" size={64} />}
-          </div>
-          <h3 className="text-xl font-semibold mb-2">
-            {passed ? 'Congratulations! You passed the quiz.' : 'You did not pass the quiz.'}
-          </h3>
-          <p className="text-lg">
-            Your score: <span className={`font-bold ${passed ? 'text-green-600' : 'text-red-600'}`}>{score.toFixed(0)}%</span>
-          </p>
-          <p className="text-sm text-slate-500 mt-2">
-            {passed 
-              ? 'You can now proceed to the next unit.' 
-              : `You need at least ${passingScore}% to pass. Please review the material and try again.`}
-          </p>
-        </div>
-        
-        <div className="space-y-6">
-          {questions.map((q, index) => {
-            const isCorrect = selectedAnswers[index] === q.correctAnswer;
-            
-            return (
-              <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
-                <div className="flex items-start">
-                  <div className="mr-3 mt-1">
-                    {isCorrect 
-                      ? <CheckCircle className="text-green-500" size={20} /> 
-                      : <XCircle className="text-red-500" size={20} />}
-                  </div>
-                  <div>
-                    <p className="font-medium mb-2">Question {index + 1}: {q.question}</p>
-                    <ul className="space-y-2">
-                      {q.options.map((option, optionIndex) => (
-                        <li 
-                          key={optionIndex}
-                          className={`pl-3 py-1 rounded ${
-                            optionIndex === q.correctAnswer 
-                              ? 'bg-green-100 text-green-800' 
-                              : optionIndex === selectedAnswers[index]
-                                ? 'bg-red-100 text-red-800'
-                                : ''
-                          }`}
-                        >
-                          {option} {optionIndex === q.correctAnswer && '✓'}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        
-        <div className="mt-8 text-center">
-          <button
-            onClick={() => {
-              setShowResults(false);
-              setSelectedAnswers(Array(questions.length).fill(-1));
-              setCurrentQuestion(0);
-            }}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Retake Quiz
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <p>Loading quiz...</p>;
+  if (error) return <p className="text-red-600">Error: {error}</p>;
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-      <h2 className="text-2xl font-bold text-center mb-6">Unit Quiz: {unitTitle}</h2>
-      
-      <div className="mb-4 flex justify-between items-center">
-        <span className="text-sm text-slate-500">Question {currentQuestion + 1} of {questions.length}</span>
-        <span className="text-sm text-slate-500">
-          {selectedAnswers.filter(a => a !== -1).length} of {questions.length} answered
-        </span>
-      </div>
-      
-      <div className="h-2 w-full bg-slate-200 rounded-full mb-6">
-        <div 
-          className="h-2 bg-blue-600 rounded-full" 
-          style={{ width: `${(currentQuestion + 1) / questions.length * 100}%` }}
-        ></div>
-      </div>
-      
-      <div className="mb-8">
-        <h3 className="text-lg font-medium mb-4">
-          {questions[currentQuestion].question}
-        </h3>
-        <div className="space-y-3">
-          {questions[currentQuestion].options.map((option, index) => (
-            <div 
-              key={index}
-              onClick={() => handleAnswerSelect(index)}
-              className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                selectedAnswers[currentQuestion] === index 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-slate-200 hover:border-blue-300'
-              }`}
-            >
-              <div className="flex items-center">
-                <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${
-                  selectedAnswers[currentQuestion] === index 
-                    ? 'border-blue-500 bg-blue-500' 
-                    : 'border-slate-300'
-                }`}>
-                  {selectedAnswers[currentQuestion] === index && (
-                    <div className="w-2 h-2 rounded-full bg-white"></div>
-                  )}
-                </div>
-                <span>{option}</span>
-              </div>
-            </div>
-          ))}
+      {questions.length === 0 ? (
+        <div className="text-center">
+          <h2 className="text-xl font-bold">Loading Quiz...</h2>
         </div>
-      </div>
-      
-      <div className="flex justify-between">
-        <button
-          onClick={handlePrevious}
-          disabled={currentQuestion === 0}
-          className={`px-4 py-2 rounded-lg ${
-            currentQuestion === 0 
-              ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-              : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-          }`}
-        >
-          Previous
-        </button>
-        
-        {currentQuestion < questions.length - 1 ? (
-          <button
-            onClick={handleNext}
-            disabled={selectedAnswers[currentQuestion] === -1}
-            className={`px-4 py-2 rounded-lg ${
-              selectedAnswers[currentQuestion] === -1 
-                ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
-          >
-            Next
-          </button>
-        ) : (
-          <button
-            onClick={handleSubmit}
-            disabled={!isQuizComplete || isSubmitting}
-            className={`px-6 py-2 rounded-lg ${
-              !isQuizComplete || isSubmitting
-                ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                : 'bg-green-600 text-white hover:bg-green-700'
-            }`}
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
-          </button>
-        )}
-      </div>
-      
-      {!isQuizComplete && currentQuestion === questions.length - 1 && (
-        <p className="text-sm text-amber-600 mt-4 text-center">
-          Please answer all questions before submitting the quiz.
-        </p>
+      ) : showResults ? (
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Quiz Results</h2>
+          <p>Your score: {calculateScore().toFixed(0)}%</p>
+          <button onClick={() => window.location.reload()} className="bg-blue-600 text-white p-2 rounded">Retry Quiz</button>
+        </div>
+      ) : (
+        <>
+          <h2 className="text-2xl font-bold text-center mb-6">Unit Quiz: {unitTitle}</h2>
+          <div className="mb-6 p-4 border rounded">
+            <p className="font-semibold">{currentQuestion + 1}. {questions[currentQuestion]?.question}</p>
+            <div className="mt-4 space-y-3">
+              {questions[currentQuestion]?.options.map((option, index) => (
+                <div 
+                  key={index} 
+                  onClick={() => handleAnswerSelect(option)} 
+                  className={`p-3 border rounded cursor-pointer transition-colors ${
+                    selectedAnswers[currentQuestion] === option 
+                      ? 'bg-blue-100 border-blue-500' 
+                      : 'hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${
+                      selectedAnswers[currentQuestion] === option 
+                        ? 'border-blue-500 bg-blue-500' 
+                        : 'border-gray-300'
+                    }`}>
+                      {selectedAnswers[currentQuestion] === option && (
+                        <div className="w-2 h-2 rounded-full bg-white"></div>
+                      )}
+                    </div>
+                    <span>{option}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex justify-between mt-4">
+            <button 
+              onClick={handlePrevious} 
+              disabled={currentQuestion === 0} 
+              className={`p-2 rounded ${currentQuestion === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 text-white'}`}
+            >
+              Previous
+            </button>
+            
+            {currentQuestion < questions.length - 1 ? (
+              <button onClick={handleNext} className="bg-blue-600 text-white p-2 rounded">Next</button>
+            ) : (
+              <button 
+                onClick={handleSubmit} 
+                disabled={isSubmitting} 
+                className={`p-2 rounded ${isSubmitting ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-600 text-white'}`}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </button>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
