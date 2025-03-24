@@ -1,8 +1,29 @@
-import Image from 'next/image'
-import { AcademicCapIcon, DocumentTextIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline'
-import { FaLinkedin, FaFacebook, FaInstagram } from 'react-icons/fa'
+"use client";
+import Image from "next/image";
+import {
+  AcademicCapIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftIcon,
+} from "@heroicons/react/24/outline";
+import { FaLinkedin, FaFacebook, FaInstagram } from "react-icons/fa";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleDashboardNavigation = () => {
+    router.push("/dashboard");
+  };
+
   return (
     <main className="min-h-screen bg-blue-50">
       {/* Navigation */}
@@ -16,13 +37,32 @@ export default function Home() {
               height={40}
               className="cursor-pointer"
             />
-            <h2 className="text-xl font-semibold text-gray-900">Disha Yash Eduteck</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Disha Yash Eduteck
+            </h2>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="text-gray-600 hover:text-gray-900">Log in</button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-              Sign up for free
-            </button>
+            <SignedIn>
+              <button
+                onClick={handleDashboardNavigation}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              >
+                Enter Dashboard
+              </button>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="text-gray-600 hover:text-gray-900">
+                  Log in
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                  Sign up for free
+                </button>
+              </SignUpButton>
+            </SignedOut>
           </div>
         </div>
       </nav>
@@ -43,8 +83,18 @@ export default function Home() {
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button className="absolute right-2 top-2 bg-blue-500 text-white p-2 rounded-md">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </button>
           </div>
@@ -84,27 +134,47 @@ export default function Home() {
             <div className="space-y-8">
               <div className="flex items-center space-x-4">
                 <DocumentTextIcon className="h-8 w-8 text-blue-500" />
-                <h3 className="font-semibold">Find all relevant study materials for your courses</h3>
+                <h3 className="font-semibold">
+                  Find all relevant study materials for your courses
+                </h3>
               </div>
-              
+
               <div className="flex items-center space-x-4 bg-blue-50  rounded-lg w-full">
                 <DocumentTextIcon className="h-8 w-8 text-blue-500" />
-                <h3 className="font-semibold">Learn more efficiently (e.g. with our flash card tool)</h3>
+                <h3 className="font-semibold">
+                  Learn more efficiently (e.g. with our flash card tool)
+                </h3>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <ChatBubbleLeftIcon className="h-8 w-8 text-blue-500" />
-                <h3 className="font-semibold">Find answers to your questions in our community</h3>
+                <h3 className="font-semibold">
+                  Find answers to your questions in our community
+                </h3>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <AcademicCapIcon className="h-8 w-8 text-blue-500" />
-                <h3 className="font-semibold">Share your study materials and receive great rewards</h3>
+                <h3 className="font-semibold">
+                  Share your study materials and receive great rewards
+                </h3>
               </div>
-              
-              <button className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">
-                Sign up for free
-              </button>
+
+              <SignedOut>
+                <SignUpButton mode="modal">
+                  <button className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">
+                    Sign up for free
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <button
+                  onClick={handleDashboardNavigation}
+                  className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600"
+                >
+                  Enter Dashboard
+                </button>
+              </SignedIn>
             </div>
             <div className="relative">
               <Image
@@ -133,10 +203,24 @@ export default function Home() {
               />
             </div>
             <div>
-              <h2 className="text-5xl font-bold mb-8">90% of our students improve their exam results</h2>
-              <button className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">
-                Sign up for free
-              </button>
+              <h2 className="text-5xl font-bold mb-8">
+                90% of our students improve their exam results
+              </h2>
+              <SignedOut>
+                <SignUpButton mode="modal">
+                  <button className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">
+                    Sign up for free
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <button
+                  onClick={handleDashboardNavigation}
+                  className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600"
+                >
+                  Enter Dashboard
+                </button>
+              </SignedIn>
             </div>
           </div>
         </div>
@@ -144,14 +228,22 @@ export default function Home() {
 
       {/* About Section */}
       <section className="bg-blue-50 py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className='grid md:grid-cols-2 gap-12 items-center'>
-        <div>
-          <h2 className="text-5xl font-bold mb-8">Add your courses and ace every lecture, seminar and test</h2>
-          <p>Our company connects students and encourages them to help each other. Together we master every exam, every assignment and every job interview.</p>
-          <p className='pt-10 text-blue-500 underline cursor-pointer'>Know about Disha Yash More</p>
-        </div>
-            <div> 
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-5xl font-bold mb-8">
+                Add your courses and ace every lecture, seminar and test
+              </h2>
+              <p>
+                Our company connects students and encourages them to help each
+                other. Together we master every exam, every assignment and every
+                job interview.
+              </p>
+              <p className="pt-10 text-blue-500 underline cursor-pointer">
+                Know about Disha Yash More
+              </p>
+            </div>
+            <div>
               <Image
                 src="/about_us.jpg"
                 alt="Happy Students"
@@ -160,19 +252,31 @@ export default function Home() {
                 className="rounded-lg"
               />
             </div>
+          </div>
         </div>
-      </div>
       </section>
 
       {/* End of the page */}
       <section>
-        <div className='text-center '>
-          <div className='text-5xl font-bold py-10'>
-          <h2 >Study Easier, Study Faster & better</h2>
+        <div className="text-center ">
+          <div className="text-5xl font-bold py-10">
+            <h2>Study Easier, Study Faster & better</h2>
           </div>
-          <button className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">
-            Sign up for free
-          </button>
+          <SignedOut>
+            <SignUpButton mode="modal">
+              <button className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">
+                Sign up for free
+              </button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <button
+              onClick={handleDashboardNavigation}
+              className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600"
+            >
+              Enter Dashboard
+            </button>
+          </SignedIn>
         </div>
       </section>
 
@@ -184,9 +288,21 @@ export default function Home() {
             <div>
               <h3 className="text-lg font-semibold mb-4">For students</h3>
               <ul className="space-y-3">
-                <li><a href="#" className="text-gray-600 hover:text-gray-900">Search study materials</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900">Rewards store</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900">Community Guidelines</a></li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-gray-900">
+                    Search study materials
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-gray-900">
+                    Rewards store
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-gray-900">
+                    Community Guidelines
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -194,10 +310,26 @@ export default function Home() {
             <div>
               <h3 className="text-lg font-semibold mb-4">For companies</h3>
               <ul className="space-y-3">
-                <li><a href="#" className="text-gray-600 hover:text-gray-900">Press</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900">Find talents</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900">Employer branding</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-gray-900">Arrange a demo</a></li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-gray-900">
+                    Press
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-gray-900">
+                    Find talents
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-gray-900">
+                    Employer branding
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-gray-900">
+                    Arrange a demo
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -213,9 +345,7 @@ export default function Home() {
                     className="cursor-pointer"
                   />
                   <div className="flex items-center mt-2">
-                    <div className="flex text-yellow-400">
-                      {'★'.repeat(5)}
-                    </div>
+                    <div className="flex text-yellow-400">{"★".repeat(5)}</div>
                     <span className="ml-2 text-gray-600">4.7</span>
                   </div>
                 </div>
@@ -229,7 +359,8 @@ export default function Home() {
                   />
                   <div className="flex items-center mt-2">
                     <div className="flex text-yellow-400">
-                      {'★'.repeat(4)}{'☆'.repeat(1)}
+                      {"★".repeat(4)}
+                      {"☆".repeat(1)}
                     </div>
                     <span className="ml-2 text-gray-600">4.3</span>
                   </div>
@@ -241,23 +372,49 @@ export default function Home() {
           {/* Bottom Footer */}
           <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center">
             <div className="flex flex-wrap gap-4 mb-4 md:mb-0">
-              <a href="#" className="text-gray-600 hover:text-gray-900">Terms of Use</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Privacy</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Imprint</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">About us</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Privacy Settings</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">
+                Terms of Use
+              </a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">
+                Privacy
+              </a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">
+                Imprint
+              </a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">
+                About us
+              </a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">
+                Privacy Settings
+              </a>
             </div>
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <span className="text-gray-600">English (US)</span>
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
               <div className="flex space-x-4">
-                <a href="#" className="text-gray-600 hover:text-gray-900"><FaLinkedin size={24} /></a>
-                <a href="#" className="text-gray-600 hover:text-gray-900"><FaFacebook size={24} /></a>
-                <a href="#" className="text-gray-600 hover:text-gray-900"><FaInstagram size={24} /></a>
+                <a href="#" className="text-gray-600 hover:text-gray-900">
+                  <FaLinkedin size={24} />
+                </a>
+                <a href="#" className="text-gray-600 hover:text-gray-900">
+                  <FaFacebook size={24} />
+                </a>
+                <a href="#" className="text-gray-600 hover:text-gray-900">
+                  <FaInstagram size={24} />
+                </a>
               </div>
             </div>
           </div>
@@ -267,5 +424,5 @@ export default function Home() {
         </div>
       </footer>
     </main>
-  )
+  );
 }
