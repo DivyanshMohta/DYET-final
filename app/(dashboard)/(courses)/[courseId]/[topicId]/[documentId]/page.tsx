@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, FileText, ChevronRight, Lock } from 'lucide-react';
-import Quiz from '@/components/Quiz';
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, FileText, ChevronRight, Lock } from "lucide-react";
+import Quiz from "@/components/Quiz";
 
 // TypeScript interfaces
 interface Document {
@@ -41,7 +41,7 @@ interface QuizData {
 
 // Sample quiz questions for each unit
 const quizQuestions: QuizData = {
-  'thermo-1': [
+  "thermo-1": [
     {
       id: 1,
       question: "What is the First Law of Thermodynamics?",
@@ -49,31 +49,21 @@ const quizQuestions: QuizData = {
         "Energy cannot be created or destroyed, only transferred or converted",
         "Heat flows from hot to cold bodies",
         "Entropy of an isolated system always increases",
-        "Work equals force times distance"
+        "Work equals force times distance",
       ],
-      correctAnswer: 0
+      correctAnswer: 0,
     },
     {
       id: 2,
       question: "Which of the following is a state function?",
-      options: [
-        "Heat",
-        "Work",
-        "Internal Energy",
-        "Power"
-      ],
-      correctAnswer: 2
+      options: ["Heat", "Work", "Internal Energy", "Power"],
+      correctAnswer: 2,
     },
     {
       id: 3,
       question: "What is the SI unit of temperature?",
-      options: [
-        "Fahrenheit",
-        "Celsius",
-        "Kelvin",
-        "Rankine"
-      ],
-      correctAnswer: 2
+      options: ["Fahrenheit", "Celsius", "Kelvin", "Rankine"],
+      correctAnswer: 2,
     },
     {
       id: 4,
@@ -82,9 +72,9 @@ const quizQuestions: QuizData = {
         "Energy is conserved",
         "Entropy of an isolated system always increases",
         "Heat flows from cold to hot bodies",
-        "Temperature is constant in phase changes"
+        "Temperature is constant in phase changes",
       ],
-      correctAnswer: 1
+      correctAnswer: 1,
     },
     {
       id: 5,
@@ -93,12 +83,12 @@ const quizQuestions: QuizData = {
         "Otto cycle",
         "Diesel cycle",
         "Carnot cycle",
-        "Vapor-compression cycle"
+        "Vapor-compression cycle",
       ],
-      correctAnswer: 3
-    }
+      correctAnswer: 3,
+    },
   ],
-  'thermo-2': [
+  "thermo-2": [
     {
       id: 1,
       question: "What is conduction?",
@@ -106,31 +96,21 @@ const quizQuestions: QuizData = {
         "Heat transfer through fluid motion",
         "Heat transfer through electromagnetic waves",
         "Heat transfer through direct contact",
-        "Heat transfer through phase changes"
+        "Heat transfer through phase changes",
       ],
-      correctAnswer: 2
+      correctAnswer: 2,
     },
     {
       id: 2,
       question: "Which material has the highest thermal conductivity?",
-      options: [
-        "Wood",
-        "Silver",
-        "Glass",
-        "Plastic"
-      ],
-      correctAnswer: 1
+      options: ["Wood", "Silver", "Glass", "Plastic"],
+      correctAnswer: 1,
     },
     {
       id: 3,
       question: "What is the formula for heat transfer by conduction?",
-      options: [
-        "Q = mcΔT",
-        "Q = hA(Ts - T∞)",
-        "Q = -kA(dT/dx)",
-        "Q = εσAT⁴"
-      ],
-      correctAnswer: 2
+      options: ["Q = mcΔT", "Q = hA(Ts - T∞)", "Q = -kA(dT/dx)", "Q = εσAT⁴"],
+      correctAnswer: 2,
     },
     {
       id: 4,
@@ -139,9 +119,9 @@ const quizQuestions: QuizData = {
         "Heat transfer through direct contact",
         "Heat transfer through fluid motion",
         "Heat transfer through electromagnetic waves",
-        "Heat transfer through phase changes"
+        "Heat transfer through phase changes",
       ],
-      correctAnswer: 1
+      correctAnswer: 1,
     },
     {
       id: 5,
@@ -150,32 +130,32 @@ const quizQuestions: QuizData = {
         "Heat transfer through direct contact",
         "Heat transfer through fluid motion",
         "Heat transfer through electromagnetic waves",
-        "Heat transfer through phase changes"
+        "Heat transfer through phase changes",
       ],
-      correctAnswer: 2
-    }
+      correctAnswer: 2,
+    },
   ],
   // Add more quizzes for other documents as needed
 };
 
 // Enhanced sample document data with unit numbers and content
 const topicsData: { [key: string]: { [key: string]: Topic } } = {
-  'mech-eng': {
-    'thermodynamics': {
-      id: 'thermodynamics',
-      title: 'Thermodynamics',
-      description: 'Study of heat, work, and energy systems',
-      icon: '🔥',
+  "mech-eng": {
+    thermodynamics: {
+      id: "thermodynamics",
+      title: "Thermodynamics",
+      description: "Study of heat, work, and energy systems",
+      icon: "🔥",
       documents: [
         {
-          id: 'thermo-1',
-          title: 'Unit 1: Introduction to Thermodynamics',
-          description: 'Basic principles and laws of thermodynamics',
-          fileType: 'PDF',
-          fileSize: '2.4 MB',
-          preview: '/images/PYTHON.jpeg',
-          downloadUrl: '#',
-          uploadDate: '2025-02-15',
+          id: "thermo-1",
+          title: "Unit 1: Introduction to Thermodynamics",
+          description: "Basic principles and laws of thermodynamics",
+          fileType: "PDF",
+          fileSize: "2.4 MB",
+          preview: "/images/PYTHON.jpeg",
+          downloadUrl: "#",
+          uploadDate: "2025-02-15",
           unitNumber: 1,
           content: `# Introduction to Thermodynamics
 
@@ -212,17 +192,17 @@ Thermodynamics has numerous applications in various fields:
 - Material science
 - Environmental science
 
-Understanding thermodynamics is crucial for designing efficient energy systems and addressing global challenges like climate change.`
+Understanding thermodynamics is crucial for designing efficient energy systems and addressing global challenges like climate change.`,
         },
         {
-          id: 'thermo-2',
-          title: 'Unit 2: Heat Transfer Fundamentals',
-          description: 'Comprehensive guide to heat transfer mechanisms',
-          fileType: 'PDF',
-          fileSize: '3.1 MB',
-          preview: '/images/CS.png',
-          downloadUrl: '#',
-          uploadDate: '2025-02-20',
+          id: "thermo-2",
+          title: "Unit 2: Heat Transfer Fundamentals",
+          description: "Comprehensive guide to heat transfer mechanisms",
+          fileType: "PDF",
+          fileSize: "3.1 MB",
+          preview: "/images/CS.png",
+          downloadUrl: "#",
+          uploadDate: "2025-02-20",
           unitNumber: 2,
           content: `# Heat Transfer Fundamentals
 
@@ -275,17 +255,17 @@ Heat transfer principles are applied in various fields:
 - Power plants
 - Electronic cooling
 - Building insulation
-- Food processing`
+- Food processing`,
         },
         {
-          id: 'thermo-3',
-          title: 'Unit 3: Thermodynamic Cycles',
-          description: 'Analysis of common thermodynamic cycles',
-          fileType: 'PDF',
-          fileSize: '1.8 MB',
-          preview: '/images/JAVA.jpeg',
-          downloadUrl: '#',
-          uploadDate: '2025-03-05',
+          id: "thermo-3",
+          title: "Unit 3: Thermodynamic Cycles",
+          description: "Analysis of common thermodynamic cycles",
+          fileType: "PDF",
+          fileSize: "1.8 MB",
+          preview: "/images/JAVA.jpeg",
+          downloadUrl: "#",
+          uploadDate: "2025-03-05",
           unitNumber: 3,
           content: `# Thermodynamic Cycles
 
@@ -327,11 +307,11 @@ Understanding thermodynamic cycles is crucial for:
 - Power plant design
 - Engine efficiency improvement
 - Refrigeration and air conditioning systems
-- Heat pump optimization`
-        }
-      ]
-    }
-  }
+- Heat pump optimization`,
+        },
+      ],
+    },
+  },
 };
 
 // User progress state (in a real app, this would be stored in a database)
@@ -344,11 +324,11 @@ interface UserProgressData {
 }
 
 const userProgress: UserProgressData = {
-  'mech-eng': {
-    'thermodynamics': {
-      completedUnits: []
-    }
-  }
+  "mech-eng": {
+    thermodynamics: {
+      completedUnits: [],
+    },
+  },
 };
 
 export default function DocumentPage() {
@@ -356,14 +336,15 @@ export default function DocumentPage() {
   const courseId = params.courseId as string;
   const topicId = params.topicId as string;
   const documentId = params.documentId as string;
-  
+
   const [document, setDocument] = useState<Document | null>(null);
   const [topic, setTopic] = useState<Topic | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState<boolean>(false);
   const [nextDocument, setNextDocument] = useState<Document | null>(null);
-  const [isNextDocumentLocked, setIsNextDocumentLocked] = useState<boolean>(true);
+  const [isNextDocumentLocked, setIsNextDocumentLocked] =
+    useState<boolean>(true);
   const [completedUnits, setCompletedUnits] = useState<string[]>([]);
 
   // Function to check if next document should be locked based on completed units
@@ -378,18 +359,17 @@ export default function DocumentPage() {
       try {
         // In a real app, you would fetch this data from an API
         setTimeout(() => {
-          if (
-            topicsData[courseId] && 
-            topicsData[courseId][topicId]
-          ) {
+          if (topicsData[courseId] && topicsData[courseId][topicId]) {
             const topicData = topicsData[courseId][topicId];
             setTopic(topicData);
-            
-            const docIndex = topicData.documents.findIndex(doc => doc.id === documentId);
+
+            const docIndex = topicData.documents.findIndex(
+              (doc) => doc.id === documentId
+            );
             if (docIndex !== -1) {
               const doc = topicData.documents[docIndex];
               setDocument(doc);
-              
+
               // Check if there's a next document
               if (docIndex < topicData.documents.length - 1) {
                 const nextDoc = topicData.documents[docIndex + 1];
@@ -397,30 +377,32 @@ export default function DocumentPage() {
               } else {
                 setNextDocument(null);
               }
-              
+
               // Load user progress
               if (userProgress[courseId]?.[topicId]) {
                 const progress = userProgress[courseId][topicId].completedUnits;
                 setCompletedUnits(progress);
-                
+
                 // Check if the next document is locked
                 if (docIndex < topicData.documents.length - 1) {
-                  setIsNextDocumentLocked(checkNextDocumentLock(documentId, progress));
+                  setIsNextDocumentLocked(
+                    checkNextDocumentLock(documentId, progress)
+                  );
                 }
               }
-              
+
               setError(null);
             } else {
-              setError('Document not found');
+              setError("Document not found");
             }
           } else {
-            setError('Topic not found');
+            setError("Topic not found");
           }
           setLoading(false);
         }, 500);
       } catch (err) {
         console.error("Error fetching document:", err);
-        setError('Failed to load document');
+        setError("Failed to load document");
         setLoading(false);
       }
     };
@@ -433,7 +415,9 @@ export default function DocumentPage() {
   // Separate useEffect to update lock status when completedUnits changes
   useEffect(() => {
     if (documentId) {
-      setIsNextDocumentLocked(checkNextDocumentLock(documentId, completedUnits));
+      setIsNextDocumentLocked(
+        checkNextDocumentLock(documentId, completedUnits)
+      );
     }
   }, [completedUnits, documentId]);
 
@@ -445,16 +429,16 @@ export default function DocumentPage() {
         newCompletedUnits.push(documentId);
       }
       setCompletedUnits(newCompletedUnits);
-      
+
       // In a real app, you would save this to a database
       if (userProgress[courseId]?.[topicId]) {
         userProgress[courseId][topicId].completedUnits = newCompletedUnits;
       }
-      
+
       // Unlock next document
       setIsNextDocumentLocked(false);
     }
-    
+
     // Hide quiz after completion
     setShowQuiz(false);
   };
@@ -475,8 +459,11 @@ export default function DocumentPage() {
       <div className="min-h-screen bg-slate-50 p-8">
         <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-8 text-center">
           <h1 className="text-2xl font-bold text-red-500 mb-4">Error</h1>
-          <p className="text-slate-600 mb-6">{error || 'Document not found'}</p>
-          <Link href={`/dashboard/courses/${courseId}/${topicId}`} className="inline-flex items-center text-blue-600 hover:text-blue-800">
+          <p className="text-slate-600 mb-6">{error || "Document not found"}</p>
+          <Link
+            href={`/dashboard/courses/${courseId}/${topicId}`}
+            className="inline-flex items-center text-blue-600 hover:text-blue-800"
+          >
             <ArrowLeft className="mr-2" size={16} />
             Back to Topic
           </Link>
@@ -490,13 +477,21 @@ export default function DocumentPage() {
       <div className="max-w-4xl mx-auto">
         {/* Breadcrumb navigation */}
         <div className="flex flex-wrap items-center text-sm text-slate-500 mb-6">
-          <Link href="/dashboard" className="hover:text-blue-600">Dashboard</Link>
-          <span className="mx-2">›</span>
-          <Link href={`/dashboard/courses/${courseId}`} className="hover:text-blue-600">
-            {courseId === 'mech-eng' ? 'Mechanical Engineering' : courseId}
+          <Link href="/dashboard" className="hover:text-blue-600">
+            Dashboard
           </Link>
           <span className="mx-2">›</span>
-          <Link href={`/dashboard/courses/${courseId}/${topicId}`} className="hover:text-blue-600">
+          <Link
+            href={`/dashboard/courses/${courseId}`}
+            className="hover:text-blue-600"
+          >
+            {courseId === "mech-eng" ? "Mechanical Engineering" : courseId}
+          </Link>
+          <span className="mx-2">›</span>
+          <Link
+            href={`/dashboard/courses/${courseId}/${topicId}`}
+            className="hover:text-blue-600"
+          >
             {topic.title}
           </Link>
           <span className="mx-2">›</span>
@@ -508,13 +503,20 @@ export default function DocumentPage() {
           <div className="flex items-start">
             <div className="text-4xl mr-4">📄</div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">{document.title}</h1>
+              <h1 className="text-2xl font-bold text-slate-800">
+                {document.title}
+              </h1>
               <p className="text-slate-500 mt-1">{document.description}</p>
               <div className="flex items-center mt-3 text-sm text-slate-400">
                 <FileText size={16} className="mr-1" />
-                <span>{document.fileType} • {document.fileSize}</span>
+                <span>
+                  {document.fileType} • {document.fileSize}
+                </span>
                 <span className="mx-2">•</span>
-                <span>Uploaded on {new Date(document.uploadDate).toLocaleDateString()}</span>
+                <span>
+                  Uploaded on{" "}
+                  {new Date(document.uploadDate).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </div>
@@ -525,21 +527,38 @@ export default function DocumentPage() {
           <>
             <div className="bg-white rounded-xl shadow-md p-6 mb-8">
               <div className="prose max-w-none">
-                {document.content.split('\n\n').map((paragraph, index) => {
-                  if (paragraph.startsWith('# ')) {
-                    return <h1 key={index} className="text-3xl font-bold mb-6">{paragraph.substring(2)}</h1>;
-                  } else if (paragraph.startsWith('## ')) {
-                    return <h2 key={index} className="text-2xl font-semibold mt-8 mb-4">{paragraph.substring(3)}</h2>;
-                  } else if (paragraph.startsWith('- ')) {
+                {document.content.split("\n\n").map((paragraph, index) => {
+                  if (paragraph.startsWith("# ")) {
+                    return (
+                      <h1 key={index} className="text-3xl font-bold mb-6">
+                        {paragraph.substring(2)}
+                      </h1>
+                    );
+                  } else if (paragraph.startsWith("## ")) {
+                    return (
+                      <h2
+                        key={index}
+                        className="text-2xl font-semibold mt-8 mb-4"
+                      >
+                        {paragraph.substring(3)}
+                      </h2>
+                    );
+                  } else if (paragraph.startsWith("- ")) {
                     return (
                       <ul key={index} className="list-disc pl-5 my-4">
-                        {paragraph.split('\n').map((item, i) => (
-                          <li key={i} className="mb-2">{item.substring(2)}</li>
+                        {paragraph.split("\n").map((item, i) => (
+                          <li key={i} className="mb-2">
+                            {item.substring(2)}
+                          </li>
                         ))}
                       </ul>
                     );
                   } else {
-                    return <p key={index} className="mb-4">{paragraph}</p>;
+                    return (
+                      <p key={index} className="mb-4">
+                        {paragraph}
+                      </p>
+                    );
                   }
                 })}
               </div>
@@ -549,7 +568,9 @@ export default function DocumentPage() {
             <div className="bg-blue-50 rounded-xl shadow-sm p-6 mb-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-lg text-blue-800">Ready to test your knowledge?</h3>
+                  <h3 className="font-semibold text-lg text-blue-800">
+                    Ready to test your knowledge?
+                  </h3>
                   <p className="text-blue-600 mt-1">
                     Complete the quiz to unlock the next unit.
                   </p>
@@ -575,14 +596,14 @@ export default function DocumentPage() {
 
         {/* Navigation buttons */}
         <div className="flex justify-between items-center">
-          <Link 
+          <Link
             href={`/dashboard/courses/${courseId}/${topicId}`}
             className="inline-flex items-center px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
             Back to Topic
           </Link>
-          
+
           {nextDocument && (
             <div>
               {isNextDocumentLocked ? (
@@ -591,7 +612,7 @@ export default function DocumentPage() {
                   Next Unit (Locked)
                 </div>
               ) : (
-                <Link 
+                <Link
                   href={`/dashboard/courses/${courseId}/${topicId}/${nextDocument.id}`}
                   className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >

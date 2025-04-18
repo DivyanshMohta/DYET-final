@@ -1,6 +1,7 @@
 import { Search, Bell, PlusCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { UserButton } from "@clerk/nextjs";
 
 const Navbar = () => {
   return (
@@ -35,8 +36,8 @@ const Navbar = () => {
         <button className="p-2 bg-gray-100 rounded-full">
           <Bell className="text-gray-500" size={20} />
         </button>
-        <button className="p-2 bg-gray-100 rounded-full">
-          <User className="text-gray-500" size={20} />
+        <button className=" bg-gray-100 rounded-full">
+          <UserButton />
         </button>
       </div>
     </header>

@@ -8,6 +8,8 @@ import EngineeringNewsFeed from "./(comp)/newfeed";
 import { Menu } from "lucide-react";
 import Courses from "./(courses)/courses";
 import UploadNotes from "./(courses)/uploadcourse";
+import AdminPanel from "./(comp)/admin-report";
+import StudentDashboard from "./(comp)/Student-report";
 
 export default function RootLayout() {
   const [activeButton, setActiveButton] = useState("Dashboard");
@@ -28,9 +30,9 @@ export default function RootLayout() {
       case "Newsfeed":
         return <EngineeringNewsFeed />;
       case "Chat":
-        return <h1 className="text-3xl font-bold">Chat with your Friends</h1>;
+        return <AdminPanel />;
       case "Groups":
-        return <h1 className="text-3xl font-bold">Your Groups</h1>;
+        return <StudentDashboard />;
       case "Career Corner":
         return <h1 className="text-3xl font-bold">Career Opportunities</h1>;
       default:

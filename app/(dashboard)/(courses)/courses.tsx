@@ -1,50 +1,59 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ArrowRight, GraduationCap, BookOpen, Library } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
-const engineeringYears = [
-  "First Year",
-  "Second Year",
-  "Third Year",
-  "Final Year",
-];
+import { Loader2 } from "lucide-react";
+import CourseSelectorGrid from "../(comp)/CourseSelectorGrid";
+import NotesViewer from "../(comp)/NotesViewer";
+import QuizSection from "../(comp)/QuizSection";
 
-const branches = [
-  "Computer Engineering",
-  "Information Technology",
-  "Electronics & Telecommunication",
-  "Mechanical Engineering",
-  "Civil Engineering",
-  "Electrical Engineering",
-];
+interface Unit {
+  unitNumber: number;
+  notesFileUrl: string;
+  summary: string;
+  quiz: { question: string; options: string[]; answer: string }[];
+}
+
+interface Subject {
+  name: string;
+  units: Unit[];
+}
 
 export default function Courses() {
+  const { isLoaded, user } = useUser();
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const [subjects, setSubjects] = useState<
-    { name: string; notesFileUrl: string; subjectId?: string }[]
+  const [selectedUnit, setSelectedUnit] = useState<string>("");
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [selectedUnitData, setSelectedUnitData] = useState<Unit | null>(null);
+  const [quiz, setQuiz] = useState<
+    { question: string; options: string[]; answer: string }[]
   >([]);
-  const [selectedPdfUrl, setSelectedPdfUrl] = useState<string>("");
-  const [quiz, setQuiz] = useState<any[]>([]);
   const [userAnswers, setUserAnswers] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [quizSubmitted, setQuizSubmitted] = useState<boolean>(false);
+  const [quizScore, setQuizScore] = useState<{
+    score: number;
+    total: number;
+  } | null>(null);
+
+  // Get user details from Clerk
+  const userId = user?.id || null;
+  const userName = user?.fullName || "Unknown User";
 
   useEffect(() => {
-    if (selectedYear && selectedBranch) {
+    if (selectedYear && selectedBranch && userId) {
       fetchSubjects(selectedYear, selectedBranch);
     }
-  }, [selectedYear, selectedBranch]);
+  }, [selectedYear, selectedBranch, userId]);
+
+  useEffect(() => {
+    if (selectedUnitData && userId) {
+      logNotesAccess();
+    }
+  }, [selectedUnitData, userId]);
 
   const fetchSubjects = async (year: string, branch: string) => {
     try {
@@ -54,24 +63,20 @@ export default function Courses() {
           year
         )}&branch=${encodeURIComponent(branch)}`
       );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       const data = await response.json();
-      console.log("API Response:", data);
 
       if (data.courses && data.courses.length > 0) {
-        // Get all subjects from all matching courses
-        let allSubjects: {
-          name: string;
-          notesFileUrl: string;
-          subjectId?: string;
-        }[] = [];
-
+        let allSubjects: Subject[] = [];
         data.courses.forEach((course: any) => {
           if (course.subjects && Array.isArray(course.subjects)) {
             allSubjects = [...allSubjects, ...course.subjects];
           }
         });
 
-        // Deduplicate subjects (in case there are any with the same name)
+        // Deduplicate subjects by name
         const uniqueSubjects = Array.from(
           new Map(
             allSubjects.map((subject) => [subject.name, subject])
@@ -90,223 +95,189 @@ export default function Courses() {
     }
   };
 
+  const logNotesAccess = async () => {
+    try {
+      const response = await fetch("/api/student-activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          userName,
+          year: selectedYear,
+          branch: selectedBranch,
+          subject: selectedSubject,
+          unitNumber: parseInt(selectedUnit),
+          activityType: "notes_access",
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to log notes access");
+      }
+    } catch (error) {
+      console.error("Error logging notes access:", error);
+    }
+  };
+
   const handleYearChange = (value: string) => {
     setSelectedYear(value);
     setSelectedBranch("");
     setSelectedSubject("");
+    setSelectedUnit("");
     setSubjects([]);
-    setSelectedPdfUrl("");
+    setSelectedUnitData(null);
     setQuiz([]);
+    setUserAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
   };
 
   const handleBranchChange = (value: string) => {
     setSelectedBranch(value);
     setSelectedSubject("");
-    setSubjects([]);
-    setSelectedPdfUrl("");
+    setSelectedUnit("");
+    setSelectedUnitData(null);
     setQuiz([]);
+    setUserAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
   };
 
   const handleSubjectChange = (value: string) => {
     setSelectedSubject(value);
-    const selectedSubjectData = subjects.find(
-      (subject) => subject.name === value
-    );
-    if (selectedSubjectData) {
-      setSelectedPdfUrl(selectedSubjectData.notesFileUrl);
-    } else {
-      setSelectedPdfUrl("");
-    }
+    setSelectedUnit("");
+    setSelectedUnitData(null);
     setQuiz([]);
+    setUserAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
   };
 
-  const handleProceed = async () => {
-    try {
-      setIsLoading(true);
-      // Step 1: Generate quiz from the PDF
-      const response = await fetch("/api/generate-quiz", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ pdfUrl: selectedPdfUrl }),
-      });
-      const data = await response.json();
-      if (data.quiz) {
-        const quizData = JSON.parse(data.quiz); // Parse the quiz JSON
-        setQuiz(quizData);
-      }
-    } catch (error) {
-      console.error("Error generating quiz:", error);
-    } finally {
-      setIsLoading(false);
+  const handleUnitChange = (value: string) => {
+    setSelectedUnit(value);
+    const subject = subjects.find((s) => s.name === selectedSubject);
+    const unit = subject?.units.find((u) => u.unitNumber.toString() === value);
+    if (unit) {
+      setSelectedUnitData(unit);
+      const shuffledQuiz = unit.quiz.sort(() => 0.5 - Math.random());
+      setQuiz(shuffledQuiz.slice(0, Math.min(10, shuffledQuiz.length)));
+    } else {
+      setSelectedUnitData(null);
+      setQuiz([]);
     }
+    setUserAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
   };
 
-  const handleAnswerChange = (questionId: string, answer: string) => {
+  const handleAnswerChange = (questionIndex: string, answer: string) => {
     setUserAnswers((prev) => ({
       ...prev,
-      [questionId]: answer,
+      [questionIndex]: answer,
     }));
   };
 
-  const handleSubmitQuiz = () => {
-    // Evaluate user answers
-    const score = quiz.reduce((acc, question) => {
-      if (userAnswers[question.id] === question.correctAnswer) {
-        return acc + 1;
-      }
-      return acc;
+  const handleSubmitQuiz = async () => {
+    const score = quiz.reduce((acc, question, index) => {
+      return userAnswers[index.toString()] === question.answer ? acc + 1 : acc;
     }, 0);
 
-    alert(`You scored ${score} out of ${quiz.length}`);
+    try {
+      const response = await fetch("/api/student-activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          userName,
+          year: selectedYear,
+          branch: selectedBranch,
+          subject: selectedSubject,
+          unitNumber: parseInt(selectedUnit),
+          activityType: "quiz_submission",
+          quizResult: {
+            score,
+            totalQuestions: quiz.length,
+            answers: userAnswers,
+          },
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to log quiz submission: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error("Error logging quiz submission:", error);
+      alert("Failed to submit quiz. Please try again.");
+      return;
+    }
+
+    setQuizSubmitted(true);
+    setQuizScore({ score, total: quiz.length });
   };
 
-  return (
-    <div className="min-h-screen py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          Course Selection
-        </h1>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <GraduationCap className="h-6 w-6 text-blue-600" />
-              <h2 className="text-xl font-semibold">Select Year</h2>
-            </div>
-            <Select value={selectedYear} onValueChange={handleYearChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose your year" />
-              </SelectTrigger>
-              <SelectContent>
-                {engineeringYears.map((year) => (
-                  <SelectItem key={year} value={year}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Card>
-
-          <Card className={`p-6 ${!selectedYear ? "opacity-50" : ""}`}>
-            <div className="flex items-center gap-3 mb-4">
-              <BookOpen className="h-6 w-6 text-blue-600" />
-              <h2 className="text-xl font-semibold">Select Branch</h2>
-            </div>
-            <Select
-              value={selectedBranch}
-              onValueChange={handleBranchChange}
-              disabled={!selectedYear}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Choose your branch" />
-              </SelectTrigger>
-              <SelectContent>
-                {branches.map((branch) => (
-                  <SelectItem key={branch} value={branch}>
-                    {branch}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Card>
-
-          <Card className={`p-6 ${!selectedBranch ? "opacity-50" : ""}`}>
-            <div className="flex items-center gap-3 mb-4">
-              <Library className="h-6 w-6 text-blue-600" />
-              <h2 className="text-xl font-semibold">Select Subject</h2>
-            </div>
-            <Select
-              value={selectedSubject}
-              onValueChange={handleSubjectChange}
-              disabled={!selectedBranch || isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    isLoading ? "Loading subjects..." : "Choose your subject"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {subjects.map((subject, index) => (
-                  <SelectItem
-                    key={subject.subjectId || `${subject.name}-${index}`}
-                    value={subject.name}
-                  >
-                    {subject.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Card>
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+          <p className="text-blue-800 font-medium">Loading user data...</p>
         </div>
+      </div>
+    );
+  }
 
-        {selectedSubject && (
-          <Button
-            className="w-full mt-8 py-6 text-lg"
-            onClick={handleProceed}
-            disabled={isLoading}
-          >
-            {isLoading ? "Loading..." : "Proceed to Learn & Assessment"}
-            {!isLoading && <ArrowRight className="ml-2 h-5 w-5" />}
-          </Button>
-        )}
+  if (!userId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+          <p className="text-red-600 font-medium mb-4">
+            Authentication Required
+          </p>
+          <p className="text-gray-600">
+            Please sign in to access the course materials.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-        {selectedPdfUrl && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Subject Notes</h2>
-            <iframe
-              src={selectedPdfUrl}
-              width="100%"
-              height="600px"
-              style={{ border: "none" }}
-              title="PDF Viewer"
-            />
-          </div>
-        )}
+  return (
+    <div className="min-h-screen bg-gradient-to-br   py-12 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl md:text-4xl font-bold text-center mb-6 text-blue-900 tracking-tight">
+          Learning Portal
+        </h1>
+        <p className="text-center text-blue-700 mb-10 max-w-2xl mx-auto">
+          Select your course details below to access study materials and
+          assessments
+        </p>
 
-        {quiz.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Quiz</h2>
-            {quiz.map((question, index) => (
-              <div key={`question-${index}`} className="mb-6">
-                <h3 className="text-lg font-semibold">{question.question}</h3>
-                <div className="space-y-2">
-                  {question.options.map(
-                    (option: string, optionIndex: number) => (
-                      <div
-                        key={`option-${index}-${optionIndex}`}
-                        className="flex items-center"
-                      >
-                        <input
-                          type="radio"
-                          id={`question-${index}-option-${optionIndex}`}
-                          name={`question-${index}`}
-                          value={option}
-                          onChange={() =>
-                            handleAnswerChange(index.toString(), option)
-                          }
-                          className="mr-2"
-                        />
-                        <label
-                          htmlFor={`question-${index}-option-${optionIndex}`}
-                        >
-                          {option}
-                        </label>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-            ))}
-            <Button
-              className="w-full mt-8 py-6 text-lg"
-              onClick={handleSubmitQuiz}
-            >
-              Submit Quiz
-            </Button>
+        <CourseSelectorGrid
+          selectedYear={selectedYear}
+          selectedBranch={selectedBranch}
+          selectedSubject={selectedSubject}
+          selectedUnit={selectedUnit}
+          subjects={subjects}
+          isLoading={isLoading}
+          onYearChange={handleYearChange}
+          onBranchChange={handleBranchChange}
+          onSubjectChange={handleSubjectChange}
+          onUnitChange={handleUnitChange}
+        />
+
+        {selectedUnitData && (
+          <div className="mt-12 space-y-12 transition-all duration-500 ease-in-out animate-fadeIn">
+            <NotesViewer unitData={selectedUnitData} />
+
+            {quiz.length > 0 && (
+              <QuizSection
+                quiz={quiz}
+                userAnswers={userAnswers}
+                onAnswerChange={handleAnswerChange}
+                onSubmitQuiz={handleSubmitQuiz}
+                quizSubmitted={quizSubmitted}
+                quizScore={quizScore}
+              />
+            )}
           </div>
         )}
       </div>
