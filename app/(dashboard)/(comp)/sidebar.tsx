@@ -76,13 +76,17 @@ const Sidebar = ({ setActiveButton, isOpen, onClose }: SidebarProps) => {
           />
           <NavItem
             icon={<MessagesSquare size={20} />}
-            label="Chat"
+            label="Admin"
             setActiveButton={setActiveButton}
             onClose={onClose}
           />
           <NavItem
             icon={<Users size={20} />}
+<<<<<<< HEAD
             label="My Activity"
+=======
+            label="My Acitivity"
+>>>>>>> 417c8a04abbab77c6dc1fcc7407e7ae266ed6f70
             setActiveButton={setActiveButton}
             onClose={onClose}
           />

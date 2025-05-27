@@ -26,9 +26,13 @@ export default function RootLayout() {
         return <UploadNotes />;
       case "Newsfeed":
         return <EngineeringNewsFeed />;
-      case "Chat":
+      case "Admin":
         return <AdminPanel />;
+<<<<<<< HEAD
       case "My Activity":
+=======
+      case "My Acitivity":
+>>>>>>> 417c8a04abbab77c6dc1fcc7407e7ae266ed6f70
         return <StudentDashboard />;
       case "Career Corner":
         return <CareerCounseling />

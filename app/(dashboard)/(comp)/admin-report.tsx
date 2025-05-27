@@ -33,7 +33,7 @@ export default function AdminPanel() {
   const [error, setError] = useState<string | null>(null);
 
   // Check if user is admin based on Clerk public metadata
-  const isAdmin = user?.publicMetadata?.role != "admin";
+  const isAdmin = user?.publicMetadata?.role === "admin";
 
   useEffect(() => {
     const fetchActivities = async () => {
