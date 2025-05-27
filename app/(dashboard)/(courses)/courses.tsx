@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-
-import { Loader2 } from "lucide-react";
+import { Loader2, BookOpen, FileQuestion } from "lucide-react";
 import CourseSelectorGrid from "../(comp)/CourseSelectorGrid";
 import NotesViewer from "../(comp)/NotesViewer";
 import QuizSection from "../(comp)/QuizSection";
@@ -19,6 +18,8 @@ interface Subject {
   name: string;
   units: Unit[];
 }
+
+type ViewMode = "notes" | "quiz";
 
 export default function Courses() {
   const { isLoaded, user } = useUser();
@@ -38,6 +39,7 @@ export default function Courses() {
     score: number;
     total: number;
   } | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("notes");
 
   // Get user details from Clerk
   const userId = user?.id || null;
@@ -50,10 +52,10 @@ export default function Courses() {
   }, [selectedYear, selectedBranch, userId]);
 
   useEffect(() => {
-    if (selectedUnitData && userId) {
+    if (selectedUnitData && userId && viewMode === "notes") {
       logNotesAccess();
     }
-  }, [selectedUnitData, userId]);
+  }, [selectedUnitData, userId, viewMode]);
 
   const fetchSubjects = async (year: string, branch: string) => {
     try {
@@ -70,6 +72,7 @@ export default function Courses() {
 
       if (data.courses && data.courses.length > 0) {
         let allSubjects: Subject[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data.courses.forEach((course: any) => {
           if (course.subjects && Array.isArray(course.subjects)) {
             allSubjects = [...allSubjects, ...course.subjects];
@@ -129,6 +132,7 @@ export default function Courses() {
     setUserAnswers({});
     setQuizSubmitted(false);
     setQuizScore(null);
+    setViewMode("notes");
   };
 
   const handleBranchChange = (value: string) => {
@@ -140,6 +144,7 @@ export default function Courses() {
     setUserAnswers({});
     setQuizSubmitted(false);
     setQuizScore(null);
+    setViewMode("notes");
   };
 
   const handleSubjectChange = (value: string) => {
@@ -150,6 +155,7 @@ export default function Courses() {
     setUserAnswers({});
     setQuizSubmitted(false);
     setQuizScore(null);
+    setViewMode("notes");
   };
 
   const handleUnitChange = (value: string) => {
@@ -167,6 +173,7 @@ export default function Courses() {
     setUserAnswers({});
     setQuizSubmitted(false);
     setQuizScore(null);
+    setViewMode("notes");
   };
 
   const handleAnswerChange = (questionIndex: string, answer: string) => {
@@ -214,6 +221,10 @@ export default function Courses() {
     setQuizScore({ score, total: quiz.length });
   };
 
+  const toggleViewMode = (mode: ViewMode) => {
+    setViewMode(mode);
+  };
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
@@ -241,7 +252,7 @@ export default function Courses() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br   py-12 px-4 sm:px-6">
+    <div className="min-h-screen bg-gradient-to-br py-12 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-6 text-blue-900 tracking-tight">
           Learning Portal
@@ -265,10 +276,40 @@ export default function Courses() {
         />
 
         {selectedUnitData && (
-          <div className="mt-12 space-y-12 transition-all duration-500 ease-in-out animate-fadeIn">
-            <NotesViewer unitData={selectedUnitData} />
+          <div className="mt-12 space-y-8 transition-all duration-500 ease-in-out animate-fadeIn">
+            {/* View Mode Toggle Buttons */}
+            <div className="flex justify-center gap-4 mb-6">
+              <button
+                onClick={() => toggleViewMode("notes")}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  viewMode === "notes"
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <BookOpen className="h-5 w-5" />
+                Study Materials
+              </button>
+              <button
+                onClick={() => toggleViewMode("quiz")}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  viewMode === "quiz"
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+                disabled={quiz.length === 0}
+              >
+                <FileQuestion className="h-5 w-5" />
+                Take Quiz
+              </button>
+            </div>
 
-            {quiz.length > 0 && (
+            {/* Conditional Content Display */}
+            {viewMode === "notes" && (
+              <NotesViewer unitData={selectedUnitData} />
+            )}
+
+            {viewMode === "quiz" && quiz.length > 0 && (
               <QuizSection
                 quiz={quiz}
                 userAnswers={userAnswers}

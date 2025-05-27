@@ -2,14 +2,13 @@
 import { useState } from "react";
 import Navbar from "./(comp)/navbar";
 import Sidebar from "./(comp)/sidebar";
-import Dashboard from "./(comp)/dashboard";
-
 import EngineeringNewsFeed from "./(comp)/newfeed";
 import { Menu } from "lucide-react";
 import Courses from "./(courses)/courses";
 import UploadNotes from "./(courses)/uploadcourse";
 import AdminPanel from "./(comp)/admin-report";
 import StudentDashboard from "./(comp)/Student-report";
+import CareerCounseling from "./(comp)/careerCoun"
 
 export default function RootLayout() {
   const [activeButton, setActiveButton] = useState("Dashboard");
@@ -21,9 +20,7 @@ export default function RootLayout() {
 
   const renderContent = () => {
     switch (activeButton) {
-      case "Dashboard":
-        return <Dashboard />;
-      case "Courses":
+      case "DashBoard":
         return <Courses />;
       case "Study Lists":
         return <UploadNotes />;
@@ -31,10 +28,10 @@ export default function RootLayout() {
         return <EngineeringNewsFeed />;
       case "Chat":
         return <AdminPanel />;
-      case "Groups":
+      case "My Activity":
         return <StudentDashboard />;
       case "Career Corner":
-        return <h1 className="text-3xl font-bold">Career Opportunities</h1>;
+        return <CareerCounseling />
       default:
         return <h1 className="text-3xl font-bold">Welcome!</h1>;
     }

@@ -1,5 +1,4 @@
-import { Search, Bell, PlusCircle, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { UserButton } from "@clerk/nextjs";
 
@@ -26,16 +25,6 @@ const Navbar = () => {
 
       {/* Right side actions */}
       <div className="flex items-center space-x-3 md:space-x-6 ml-auto">
-        <Button
-          variant="outline"
-          className="hidden md:flex items-center space-x-2"
-        >
-          <PlusCircle size={18} />
-          <span>Add</span>
-        </Button>
-        <button className="p-2 bg-gray-100 rounded-full">
-          <Bell className="text-gray-500" size={20} />
-        </button>
         <button className=" bg-gray-100 rounded-full">
           <UserButton />
         </button>

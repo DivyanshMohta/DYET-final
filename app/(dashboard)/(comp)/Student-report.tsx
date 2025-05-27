@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+
 
 interface StudentActivity {
   _id: string;
@@ -81,14 +80,7 @@ export default function StudentDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 py-12">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center mb-6">
-          <Link
-            href="/dashboard/courses"
-            className="text-blue-600 hover:text-blue-800 flex items-center"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" /> Back to Courses
-          </Link>
-        </div>
+       
         <h1 className="text-3xl font-bold text-center mb-8 text-slate-800">
           My Activity Dashboard
         </h1>

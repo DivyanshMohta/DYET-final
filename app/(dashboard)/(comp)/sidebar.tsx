@@ -1,5 +1,4 @@
 import {
-  Home,
   BookOpen,
   List,
   Newspaper,
@@ -34,8 +33,12 @@ const Sidebar = ({ setActiveButton, isOpen, onClose }: SidebarProps) => {
       `}
       >
         <div className="flex justify-between items-center">
-          <h2 className="text-xl md:text-2xl font-bold text-blue-600">
-            <img src="/logo.png" width="50px" />
+          <h2 className="text-xs md:text-2xl font-bold text-blue-600">
+            <a href="/app/page.tsx">
+
+            <img src="/logo.jpg" width="100px" />
+            </a>
+     
           </h2>
           <button
             onClick={onClose}
@@ -48,14 +51,14 @@ const Sidebar = ({ setActiveButton, isOpen, onClose }: SidebarProps) => {
 
         <nav className="mt-5 flex-1 space-y-4 md:space-y-6 overflow-y-auto">
           <NavItem
-            icon={<Home size={20} />}
-            label="Dashboard"
+            icon={<BookOpen size={20} />}
+            label="DashBoard"
             setActiveButton={setActiveButton}
             onClose={onClose}
           />
           <NavItem
             icon={<BookOpen size={20} />}
-            label="Courses"
+            label="Competitive Exam Notes"
             setActiveButton={setActiveButton}
             onClose={onClose}
           />
@@ -79,7 +82,7 @@ const Sidebar = ({ setActiveButton, isOpen, onClose }: SidebarProps) => {
           />
           <NavItem
             icon={<Users size={20} />}
-            label="Groups"
+            label="My Activity"
             setActiveButton={setActiveButton}
             onClose={onClose}
           />
@@ -90,19 +93,6 @@ const Sidebar = ({ setActiveButton, isOpen, onClose }: SidebarProps) => {
             onClose={onClose}
           />
         </nav>
-
-        {/* Log Out Button */}
-        <div className="mt-auto pb-4">
-          <button
-            className="bg-blue-500 text-white py-2 px-4 rounded-lg w-full hover:bg-blue-600 transition-colors"
-            onClick={() => {
-              setActiveButton("Log Out");
-              onClose();
-            }}
-          >
-            Log Out
-          </button>
-        </div>
       </aside>
     </>
   );
