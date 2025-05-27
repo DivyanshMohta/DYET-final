@@ -29,9 +29,9 @@ export default function RootLayout() {
         return <UploadNotes />;
       case "Newsfeed":
         return <EngineeringNewsFeed />;
-      case "Chat":
+      case "Admin":
         return <AdminPanel />;
-      case "Groups":
+      case "My Acitivity":
         return <StudentDashboard />;
       case "Career Corner":
         return <h1 className="text-3xl font-bold">Career Opportunities</h1>;

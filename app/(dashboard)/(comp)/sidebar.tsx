@@ -73,13 +73,13 @@ const Sidebar = ({ setActiveButton, isOpen, onClose }: SidebarProps) => {
           />
           <NavItem
             icon={<MessagesSquare size={20} />}
-            label="Chat"
+            label="Admin"
             setActiveButton={setActiveButton}
             onClose={onClose}
           />
           <NavItem
             icon={<Users size={20} />}
-            label="Groups"
+            label="My Acitivity"
             setActiveButton={setActiveButton}
             onClose={onClose}
           />
